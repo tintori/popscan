@@ -15,6 +15,10 @@ drawCrops <- function(exp.design,
                       save.to="./tmp_meta_with_crop_coords.csv",
                       path.to.ij.jar = "/Applications/ImageJ.app/Contents/Java/ij.jar"){
     if(!file.exists(path.to.ij.jar)){ quit("ERROR: I can't find the ij.jar file you specified.")}
+    # make imageJ macro
+    write_ij_script(which.script = "draw_scropt")
+    path.to.macro = paste0(find.package("popscan"), "/define_circles.txt")
+    
     for(tmp.row in match(unique(exp.design$scan.prefix), exp.design$scan.prefix)){
         # If "start.from", skip everything until the start.from prefix matches
         if(!is.na(start.from)){
@@ -41,7 +45,7 @@ drawCrops <- function(exp.design,
                 next
             }
             print(paste0("Setting crop coordinates for crop \'", tmp.crop, "\' out of ", length(tmp.crops), " (", tmp.scan.name, ")" ))
-            tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ./popscan/imageJ/define_circles.txt '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
+            tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
             system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
             tmp.log = read.csv2("tmp_wormscanR_imageJ_log.txt", header = F)
             exp.design[which(exp.design$scan.prefix == exp.design$scan.prefix[tmp.row] & 
