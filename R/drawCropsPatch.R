@@ -1,3 +1,14 @@
+#' Define crop coordinates
+#'
+#' This function opens scanner images in imageJ, prompts you to draw the cropping circle, and saves the coordinates.
+#' @param exp.design A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
+#' @param start.from If you started this process earlier and are continuing mid-way, specify the scan.prefix to start with.
+#' @param patch.up If you did this process already but want to change the crop for one plate, specify the scan.prefix of the plate.
+#' @param save.to Location where crop coordinates will be saved.
+#' @param path.to.ij.jar Location of imageJ jar file. Defaults to "/Applications/ImageJ.app/Contents/Java/ij.jar".
+#' @export
+#' @examples
+#' drawCrops()
 
 drawCrops <- function(exp.design, 
                       start.from=NA, patch.up=NA, 
