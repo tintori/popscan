@@ -16,7 +16,7 @@ drawCrops <- function(exp.design,
                       path.to.ij.jar = "/Applications/ImageJ.app/Contents/Java/ij.jar"){
     if(!file.exists(path.to.ij.jar)){ quit("ERROR: I can't find the ij.jar file you specified.")}
     # make imageJ macro
-    write_ij_script(which.script = "draw_scropt")
+    write_ij_script(which.script = "draw_crops")
     path.to.macro = paste0(find.package("popscan"), "/define_circles.txt")
     
     for(tmp.row in match(unique(exp.design$scan.prefix), exp.design$scan.prefix)){
