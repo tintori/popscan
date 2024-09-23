@@ -1,0 +1,61 @@
+// Can run in the command line using:
+//            java -jar /Applications/ImageJ.app/Contents/Java/ij.jar -macro /Volumes/scanner_farm/00_imageJ_macros/histo.txt [in_folder]
+// Or, if you're running it on a whole folder of cropped folders:
+//		for i in /Volumes/scanner_farm/2022-..._INFOLDER..._cropped/*[0-9]; do echo $i; java -jar /Applications/ImageJ.app/Contents/Java/ij.jar -macro /Volumes/scanner_farm/00_imageJ_macros/histo.txt $i;  done
+
+
+
+print("Herewego");
+
+// Parse settings out of input
+
+in_folder = getArgument;
+
+// Clear lagging "/" from folder name
+if(substring(in_folder, in_folder.length-1, in_folder.length)=="/"){
+	in_folder = substring(in_folder, 0, in_folder.length-1);
+}
+
+out_folder = in_folder+"_hists";
+File.makeDirectory(out_folder);
+
+print("Making histogram of all images from "+in_folder);
+print("Putting them in "+out_folder);
+
+// Open images and histogram them
+
+files_in =getFileList(in_folder);
+
+for(i=0; i<(files_in.length); i++){
+	sample = files_in[i];
+	print(sample);
+	out_file = out_folder+"/"+sample+".txt";
+	print(out_file);
+	open(in_folder+"/"+sample);
+
+	nBins = 256;
+	run("Clear Results");
+	row = 0;
+	getHistogram(values, counts, nBins);
+	for (j=0; j<nBins; j++) {
+		setResult("Value", row, values[j]);
+		setResult("Count", row, counts[j]);
+		row++;
+	 }
+	updateResults();
+
+	saveAs("Results", out_file);
+
+//	setThreshold(0, thresh);
+//	setOption("BlackBackground", false);
+//	run("Convert to Mask");
+//	run("Select All");
+//	run("Measure");
+	close();
+}
+
+//saveAs("Results", out_file);
+
+print("Done :)");
+
+run("Quit");

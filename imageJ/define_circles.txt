@@ -1,0 +1,26 @@
+// Can run in the command line using:
+//            java -jar /Applications/ImageJ.app/Contents/Java/ij.jar -macro /path/to/define_circles.txt '[in_file] [crop_name]'
+
+
+setOption("ExpandableArrays", true);
+ins = getArgument;
+in_list = split(ins," ");
+infile = in_list[0];
+crop_name = in_list[1];
+
+open(infile);
+
+setTool("oval");
+waitForUser("With this dialogue box open, drag oval to specify crop coordinates for plate "+crop_name+" on this image\nthen click \"OK\"");
+getSelectionBounds(x, y, width, height);
+
+print(x, y, width, height);
+selectWindow("Log");
+saveAs("Text", "tmp_wormscanR_imageJ_log.txt");
+close();
+run("Quit");
+
+
+
+
+

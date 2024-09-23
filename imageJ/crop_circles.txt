@@ -1,0 +1,79 @@
+// Can run in the command line using:
+//            java -jar /Applications/ImageJ.app/Contents/Java/ij.jar -macro /Volumes/scanner_farm/00_imageJ_macros/crop_circles.txt "[in_folder] [keyword] [x1] [y1] [w1] [h1] [x2] [y2]...."
+
+
+print("Herewego");
+setOption("ExpandableArrays", true);
+
+
+// Parse settings out of input
+
+keyword = "";
+ins = getArgument;
+in_list = split(ins," ");
+event_nums = (((in_list.length)-2)/5);
+
+if(in_list.length>5){
+	in_folder = in_list[0];
+	if(substring(in_folder, in_folder.length-1, in_folder.length)=="/")
+	in_folder = substring(in_folder, 0, in_folder.length-1);
+	keyword=in_list[1];
+	print("Processing all samples from "+in_folder+"/ that begin with \""+keyword+"\"");
+}else{
+	exit ("Error: No arguments. Please supply \"[in_folder] [keyword] [x1] [y1] [w1] [h1] [x2] [y2]....\" ");
+}
+
+name = newArray();
+x = newArray();
+y = newArray();
+w = newArray();
+h = newArray();
+
+for(event_num=0; event_num<event_nums; event_num++){
+	name[event_num] = in_list[event_num*5+2];
+	x[event_num] = in_list[event_num*5+3];
+	y[event_num] = in_list[event_num*5+4];
+	w[event_num] = in_list[event_num*5+5];
+	h[event_num] = in_list[event_num*5+6];
+}
+
+print("names, xs, ys, widths, and heights:");
+Array.print(name);
+Array.print(x);
+Array.print(y);
+Array.print(w);
+Array.print(h);
+
+
+// Crop images and save
+
+out_folder = in_folder+"_cropped";
+File.makeDirectory(out_folder);
+files_in =getFileList(in_folder);
+
+
+for(i=0; i<(files_in.length); i++){			// i is every single file, including those that don't match
+	sample = files_in[i];
+	print(sample);
+	if(substring(sample, 0, Math.min(keyword.length, sample.length))==keyword){		// if it matches
+		print("file accepted");
+
+		open(in_folder+"/"+sample);
+		rename("orig");
+		for (j=0; j<(x.length); j++){		// j is however objects there are to be cropped out of the scan
+			print("crop "+name[j]);
+			File.makeDirectory(out_folder+"/"+name[j]+"_"+keyword);
+			makeRectangle(x[j], y[j], w[j], h[j]);
+			run("Duplicate...", "title=crop");
+			makeOval(0,0,w[j],h[j]);
+			run("Clear Outside");
+			saveAs("Tiff", out_folder+"/"+name[j]+"_"+keyword+"/"+name[j]+"_"+sample);
+			close();
+		}
+		close();
+	}
+}
+
+print("Done :)");
+
+run("Quit");
