@@ -40,7 +40,7 @@ drawCrops <- function(exp.design,
         tmp.scan.file = list.files(path = tmp.scan.path, pattern = exp.design$scan.prefix[tmp.row])
         if(length(tmp.scan.file)==0){
             print(paste0("Skipping ", tmp.scan.name, " because there are no files that match that prefix"))
-            break
+            next
         }
         tmp.scan.file = tmp.scan.file[length(tmp.scan.file)]
         tmp.crops = unique(exp.design[which(exp.design$scan.prefix==tmp.scan.name),"scan.position"])
@@ -48,7 +48,7 @@ drawCrops <- function(exp.design,
             if(exp.design[which(exp.design$scan.position==tmp.crop & exp.design$scan.prefix==tmp.scan.name),
                           "filterer"]==FALSE){
                 print(paste0("Skipping ", tmp.scan.name, " crop ", tmp.crop, " because it was annotated to be skipped"))
-                break
+                next
             }
             print(paste0("Setting crop coordinates for crop \'", tmp.crop, "\' out of ", length(tmp.crops), " (", tmp.scan.name, ")" ))
             tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
