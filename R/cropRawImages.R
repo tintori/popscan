@@ -20,7 +20,7 @@ cropRawImages <- function(exp.design,
     # Set counter, which is only used for "start.from" option
     counter=0 
     
-    for(tmp.scan in unique(exp.design$scan.prefix)){
+    for(tmp.scan in unique(exp.design[which(!is.na(exp.design$crop.coords)),"scan.prefix"])){
         
         # If "start.from", skip everything until the start.from prefix matches
         if(!is.na(start.from)){
@@ -39,7 +39,7 @@ cropRawImages <- function(exp.design,
         tmp.row = which(exp.design$scan.prefix==tmp.scan)[1]
         tmp.infolder = exp.design[tmp.row,"scan.dir"]
         tmp.coordsets = ""
-        for(tmp.crop in exp.design$scan.position[which(exp.design$scan.prefix==tmp.scan)]){
+        for(tmp.crop in exp.design$scan.position[which(exp.design$scan.prefix==tmp.scan & !is.na(exp.design$crop.coords))]){
             if(exp.design[which(exp.design$scan.position==tmp.crop & 
                                 exp.design$scan.prefix==tmp.scan),
                           "filterer"]==FALSE){
