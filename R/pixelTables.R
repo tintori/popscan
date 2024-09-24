@@ -21,7 +21,7 @@ pixelTables <- function(exp.design,
     for(tmp.row in match(unique(exp.design$path.to.crop), exp.design$path.to.crop)){
         tmp.scan = exp.design$scan.prefix[tmp.row]
         tmp.folder = exp.design$path.to.crop[tmp.row]
-        
+
         # If "start.from", skip everything until the start.from prefix matches
         if(!is.na(start.from)){
             if(tmp.scan == start.from){counter = counter +1}
@@ -33,7 +33,10 @@ pixelTables <- function(exp.design,
             if(tmp.scan != patch.up){next}
         }
         
-        if(exp.design$filterer == FALSE){next}
+        # If there are no crops for this, keep moving
+        if(!dir.exists(tmp.folder)){next}
+        
+        if(exp.design$filterer[tmp.row] == FALSE){next}
         print(tmp.folder)
         tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '",
                              tmp.folder, "'")
