@@ -112,7 +112,7 @@ if(in_list.length>5){
 	if(substring(in_folder, in_folder.length-1, in_folder.length)=="/")
 	in_folder = substring(in_folder, 0, in_folder.length-1);
 	keyword=in_list[1];
-	print("Processing all samples from "+in_folder+"/ that begin with \""+keyword+"\"");
+	print("Processing all samples from "+in_folder+"/ that begin with \\""+keyword+"\\"");
 }else{
 	exit ("Error: No arguments. Please supply \"[in_folder] [keyword] [x1] [y1] [w1] [h1] [x2] [y2]....\" ");
 }
