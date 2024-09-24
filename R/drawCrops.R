@@ -47,7 +47,7 @@ drawCrops <- function(exp.design,
             if(exp.design[which(exp.design$scan.position==tmp.crop & exp.design$scan.prefix==tmp.scan.name),
                           "filterer"]==FALSE){
                 print(paste0("Skipping ", tmp.scan.name, " crop ", tmp.crop, " because it was annotated to be skipped"))
-                next
+                break
             }
             print(paste0("Setting crop coordinates for crop \'", tmp.crop, "\' out of ", length(tmp.crops), " (", tmp.scan.name, ")" ))
             tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
