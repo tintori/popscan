@@ -14,7 +14,12 @@ cropRawImages <- function(exp.design,
                           crop.coords = "crop.coords", start.from=NA, patch.up=NA,
                           path.to.ij.jar = "/Applications/ImageJ.app/Contents/Java/ij.jar"){
     if(!file.exists(path.to.ij.jar)){ quit("ERROR: I can't find the ij.jar file you specified.")}
-    counter=0 # only used for "start.from" option
+    # Make imageJ macro and locate it
+    write_ij_script(which.script = "crop_images")
+    path.to.macro = paste0(find.package("popscan"), "/crop_circles.txt")
+    # Set counter, which is only used for "start.from" option
+    counter=0 
+    
     for(tmp.scan in unique(exp.design$scan.prefix)){
         
         # If "start.from", skip everything until the start.from prefix matches
@@ -48,7 +53,7 @@ cropRawImages <- function(exp.design,
         }
         
         # Make the imageJ command and run
-        tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ./popscanR/imageJ/crop_circles.txt '",
+        tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '",
                              tmp.infolder, " ",
                              tmp.scan, " ",
                              tmp.coordsets, "'")
