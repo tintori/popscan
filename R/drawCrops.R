@@ -48,7 +48,8 @@ drawCrops <- function(exp.design,
             tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
             system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
             tmp.log = read.csv2("tmp_wormscanR_imageJ_log.txt", header = F)
-            if(length(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]]) != 4){
+            if(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]][1] == "0" &
+               strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]][2] == "0"){
                 print("Canceled")
                 break
             }
