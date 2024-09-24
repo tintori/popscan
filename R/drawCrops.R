@@ -49,6 +49,7 @@ drawCrops <- function(exp.design,
             system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
             tmp.log = read.csv2("tmp_wormscanR_imageJ_log.txt", header = F)
             if(length(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]]) != 4){
+                print("Canceled")
                 break
             }
             exp.design[which(exp.design$scan.prefix == exp.design$scan.prefix[tmp.row] & 
