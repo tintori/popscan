@@ -38,9 +38,7 @@ drawCrops <- function(exp.design,
         tmp.scan.file = list.files(path = tmp.scan.path, pattern = exp.design$scan.prefix[tmp.row])
         tmp.scan.file = tmp.scan.file[length(tmp.scan.file)]
         tmp.crops = unique(exp.design[which(exp.design$scan.prefix==tmp.scan.name),"scan.position"])
-        countr = 0
         for(tmp.crop in tmp.crops){
-            if(countr==1){break}
             if(exp.design[which(exp.design$scan.position==tmp.crop & exp.design$scan.prefix==tmp.scan.name),
                           "filterer"]==FALSE){
                 print(paste0("Skipping ", tmp.scan.name, " crop ", tmp.crop, " because it was annotated to be skipped"))
@@ -51,7 +49,6 @@ drawCrops <- function(exp.design,
             system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
             tmp.log = read.csv2("tmp_wormscanR_imageJ_log.txt", header = F)
             if(length(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]]) != 4){
-                countr=1
                 break
             }
             exp.design[which(exp.design$scan.prefix == exp.design$scan.prefix[tmp.row] & 
