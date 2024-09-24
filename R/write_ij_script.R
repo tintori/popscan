@@ -78,7 +78,7 @@ crop_name = in_list[1];
 open(infile);
 
 setTool("oval");
-waitForUser("Drag selection oval over crop region for plate "+crop_name+" on this image then click \'OK\'");
+waitForUser("Drag selection oval over crop region for plate "+crop_name+" on this image then click \'OK\'. Click OK without making a selection to exit");
 getSelectionBounds(x, y, width, height);
 
 print(x, y, width, height);

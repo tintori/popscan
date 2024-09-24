@@ -47,9 +47,9 @@ drawCrops <- function(exp.design,
             }
             print(paste0("Setting crop coordinates for crop \'", tmp.crop, "\' out of ", length(tmp.crops), " (", tmp.scan.name, ")" ))
             tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '", tmp.scan.path, "/", tmp.scan.file, " ", tmp.crop, "'")
-            print(tmp.command)
             system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
             tmp.log = read.csv2("tmp_wormscanR_imageJ_log.txt", header = F)
+            if(length(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]]) != 4){break}
             exp.design[which(exp.design$scan.prefix == exp.design$scan.prefix[tmp.row] & 
                                  exp.design$scan.position==tmp.crop),"crop.coords"] = 
                 tmp.log[nrow(tmp.log),1]
