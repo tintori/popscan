@@ -2,7 +2,7 @@
 #'
 #' This function cleans up the metadata table, and allows you to specify roles for columns.
 #' @param in.table A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
-#' @param scan.dir The path to the directory containing the scanner images.
+#' @param scan.dir FULL path to the directory containing the scanner images.
 #' @param scan.prefix Which column specifies the scanner file names. Defaults to "scan".
 #' @param scan.position If there are multiple plates per scan, this column specifies which crop on the original scan corresponds to the sample. Defaults to "position", but "", NA, NULL, "none" are also good options
 #' @param group.factors Column(s) to group  data by.

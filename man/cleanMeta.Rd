@@ -46,7 +46,7 @@ cleanMeta(
 
 \item{trimafter}{Column that specifies the timepoint after which data for plate should be ignored. Date format = yy-mm-dd_HH_MM}
 
-\item{scan.dir}{The path to the directory containing the scanner images.}
+\item{scan.dir}{FULL path to the directory containing the scanner images.}
 }
 \description{
 This function cleans up the metadata table, and allows you to specify roles for columns.

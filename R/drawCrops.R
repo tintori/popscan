@@ -36,7 +36,11 @@ drawCrops <- function(exp.design,
         # Locate the file series, and then locate the last file in the series
         tmp.scan.path = exp.design$scan.dir[tmp.row]
         tmp.scan.name = exp.design$scan.prefix[tmp.row]
+        tmp.scan.file = NULL
         tmp.scan.file = list.files(path = tmp.scan.path, pattern = exp.design$scan.prefix[tmp.row])
+        if(length(tmp.scan.file)==0){
+            print(paste0("Skipping ", tmp.scan.name, " because there are no files that match that prefix"))
+        }
         tmp.scan.file = tmp.scan.file[length(tmp.scan.file)]
         tmp.crops = unique(exp.design[which(exp.design$scan.prefix==tmp.scan.name),"scan.position"])
         for(tmp.crop in tmp.crops){
@@ -62,6 +66,7 @@ drawCrops <- function(exp.design,
     }
     system("rm tmp_wormscanR_imageJ_log.txt")
     write.csv(exp.design, file = save.to, quote = F, row.names = F)
+    print(paste0("Updated table returned, and also written to ", save.to))
     return(exp.design)
 }
 
