@@ -13,7 +13,11 @@ pixelTables <- function(exp.design,
                         start.from=NA, patch.up=NA, 
                         path.to.ij.jar = "/Applications/ImageJ.app/Contents/Java/ij.jar"){
     if(!file.exists(path.to.ij.jar)){ quit("ERROR: I can't find the ij.jar file you specified.")}
-    counter=0 # only used for "start.from" option
+    # Make imageJ macro and locate it
+    write_ij_script(which.script = "pix_int")
+    path.to.macro = paste0(find.package("popscan"), "/tabulate_pix_int.txt")
+    # Set counter, which is only used for "start.from" option
+    counter=0 
     for(tmp.row in match(unique(exp.design$path.to.crop), exp.design$path.to.crop)){
         tmp.scan = exp.design$scan.prefix[tmp.row]
         tmp.folder = exp.design$path.to.crop[tmp.row]
@@ -31,7 +35,7 @@ pixelTables <- function(exp.design,
         
         if(exp.design$filterer == FALSE){next}
         print(tmp.folder)
-        tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ./popscanR/imageJ/tabulate_pix_int.txt '",
+        tmp.command = paste0("java -jar ", path.to.ij.jar, " --console -macro ", path.to.macro, " '",
                              tmp.folder, "'")
         system(tmp.command, ignore.stdout = TRUE, intern=TRUE, ignore.stderr = TRUE)
     }
