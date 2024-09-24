@@ -19,7 +19,7 @@ drawCrops <- function(exp.design,
     # Make imageJ macro
     write_ij_script(which.script = "draw_crops")
     path.to.macro = paste0(find.package("popscan"), "/define_circles.txt")
-    
+    countr=0
     for(tmp.row in match(unique(exp.design$scan.prefix), exp.design$scan.prefix)){
         # If "start.from", skip everything until the start.from prefix matches
         if(!is.na(start.from)){
@@ -31,6 +31,7 @@ drawCrops <- function(exp.design,
             patch.row = match(patch.up, exp.design$scan.prefix)
             if(tmp.row != patch.row){next}
         }
+        if(countr==1){break}
         
         # Locate the file series, and then locate the last file in the series
         tmp.scan.path = exp.design$scan.dir[tmp.row]
@@ -51,6 +52,7 @@ drawCrops <- function(exp.design,
             if(strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]][1] == "0" &
                strsplit(tmp.log[nrow(tmp.log),1], split = " ")[[1]][2] == "0"){
                 print("Canceled")
+                countr=1
                 break
             }
             exp.design[which(exp.design$scan.prefix == exp.design$scan.prefix[tmp.row] & 
