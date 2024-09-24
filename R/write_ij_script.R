@@ -63,7 +63,7 @@ run("Quit");
 ')
         sink()
     }
-    
+
     if(which.script %in% c("draw_crops", "all")){
         script.path = paste0(ij.script.dir, "/define_circles.txt")
         sink(script.path)
@@ -78,7 +78,7 @@ crop_name = in_list[1];
 open(infile);
 
 setTool("oval");
-waitForUser("With this dialogue box open, drag oval to specify crop coordinates for plate "+crop_name+" on this image\nthen click \"OK\"");
+waitForUser("Drag selection oval over crop region for plate "+crop_name+" on this image then click \"OK\"");
 getSelectionBounds(x, y, width, height);
 
 print(x, y, width, height);
@@ -90,7 +90,7 @@ run("Quit");
 ')
         sink()
     }
-    
+
     if(which.script %in% c("crop_images", "all")){
         script.path = paste0(ij.script.dir, "/crop_circles.txt")
         sink(script.path)
@@ -174,4 +174,5 @@ run("Quit");
 ')
         sink()
     }
+
 }
