@@ -40,6 +40,7 @@ drawCrops <- function(exp.design,
         tmp.scan.file = list.files(path = tmp.scan.path, pattern = exp.design$scan.prefix[tmp.row])
         if(length(tmp.scan.file)==0){
             print(paste0("Skipping ", tmp.scan.name, " because there are no files that match that prefix"))
+            break
         }
         tmp.scan.file = tmp.scan.file[length(tmp.scan.file)]
         tmp.crops = unique(exp.design[which(exp.design$scan.prefix==tmp.scan.name),"scan.position"])
