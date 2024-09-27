@@ -13,8 +13,6 @@ growthCurves <- function(exp.design,
                          remove.minimum = F,
                          save.to = "./tmp_standard_deviations.csv" ){
     library(dplyr)
-    # library(tidyverse)
-    # library(ggplot2)
 
     # Load data
     print("LOADING DATA")

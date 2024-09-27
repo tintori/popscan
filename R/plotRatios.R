@@ -5,6 +5,7 @@
 #' @param save.to.folder The folder where images will be saved. Defaults to "./tmp_plots".
 #' @param plot.by.sens.score Plot ratios by sensitivity. Defaults to TRUE.
 #' @param plot.ctrl.by.exp Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.
+#' @param wide.view For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.
 #' @param p.width Width of ratio plots. Defaults to 7.
 #' @param p.height Height of ratio plots. Defaults to 5.
 #' @export
@@ -13,9 +14,9 @@
 
 plotRatios <- function(sd.table, exp.design, 
                        save.to.folder="./tmp_plots", 
-                       plot.by.pval = T,
-                       plot.by.ctrl = T,
-                       plot.by.sens.score = T,
+                       plot.by.sens.score = TRUE,
+                       plot.ctrl.by.exp = TRUE,
+                       wide.view = FALSE,
                        p.width = 7,
                        p.height = 5){
     library(ggplot2)
@@ -31,16 +32,7 @@ plotRatios <- function(sd.table, exp.design,
 
     if(!dir.exists(save.to.folder)){dir.create(save.to.folder)}
     
-    # set how many/which colors
-    pinkgreen8 = c("#4d9221", "#7fbc41", "#b8e186", "#e6f5d0", "#fde0ef", "#f1b6da", "#de77ae", "#c51b7d", "#821252", "#960EBE", "#6600FF", "#5555FF", "#44AAFF", "#33FFFF")
-    color_adding_order = c(1,8,6,3,7,2,5,4,9,10,11,12,13,14)
-    custom_color = NULL
-    if(length(unique(exp.design$colorer))%in%c(1,2)){ custom_color = scale_color_manual(values = "black", limits=unique(exp.design$colorer))}
-    if(length(unique(exp.design$colorer)) %in% c(3:14)) {
-        custom_color = scale_color_manual(values = pinkgreen8[sort(c(color_adding_order[2:length(unique(exp.design$colorer))]))],
-                                          limits=unique(exp.design$colorer))
-    }
-    
+    # set colors
     if(length(unique(exp.design$colorer))>2){
         quit("ERROR: I can't handle multiple experimental conditions yet. If you want to make these plots, just give me two treatments you want ratios for.")
     }
@@ -100,8 +92,39 @@ plotRatios <- function(sd.table, exp.design,
         
     }
     
-    # Eventually, add one that plots avg ctrl on the x axis and avg exp on the y axis.
-    
+    # Plot by avg ctrl vs avg experiment for each strain
+    if(plot.ctrl.by.exp){
+       
+        p = ggplot()+
+            geom_segment(data = ratio.table, aes(x = !!sym(avg.levels[1]) - !!sym(sd.levels[1]),
+                                                 xend = !!sym(avg.levels[1]) + !!sym(sd.levels[1]),
+                                                 y = !!sym(avg.levels[2]), yend = !!sym(avg.levels[2])), color="gray")+
+            geom_segment(data = ratio.table, aes(x = !!sym(avg.levels[1]), xend = !!sym(avg.levels[1]),
+                                                 y = !!sym(avg.levels[2]) - !!sym(sd.levels[2]),
+                                                 yend = !!sym(avg.levels[2]) + !!sym(sd.levels[2])), color="gray")+
+            geom_point(data = ratio.table, aes(x= !!sym(avg.levels[1]), y= !!sym(avg.levels[2])))+
+
+            xlab("Ctrl time to consume food")+
+            ylab("Treatment tie to consume food")+
+            theme_sophie
+        if(wide.view){
+            tmp.min = min(c(ratio.table[,avg.levels[1]]-ratio.table[,sd.levels[1]],
+                            ratio.table[,avg.levels[2]]-ratio.table[,sd.levels[2]] ))
+            tmp.max = max(c(ratio.table[,avg.levels[1]]+ratio.table[,sd.levels[1]],
+                            ratio.table[,avg.levels[2]]+ratio.table[,sd.levels[2]] ))
+            p = p +
+                xlim(c(tmp.min, tmp.max))+
+                ylim(c(tmp.min, tmp.max))+
+                geom_abline(intercept = 0, slope = 1, linetype="dotted", color = "gray")+
+                coord_fixed()
+            p.width = p.height
+        }
+        print(p)
+        
+        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp.pdf"), device = "pdf",
+               width = p.width, height = p.height )
+        
+    }
     
     
 }

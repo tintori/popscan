@@ -8,9 +8,9 @@ plotRatios(
   sd.table,
   exp.design,
   save.to.folder = "./tmp_plots",
-  plot.by.pval = T,
-  plot.by.ctrl = T,
-  plot.by.sens.score = T,
+  plot.by.sens.score = TRUE,
+  plot.ctrl.by.exp = TRUE,
+  wide.view = FALSE,
   p.width = 7,
   p.height = 5
 )
@@ -24,11 +24,13 @@ plotRatios(
 
 \item{plot.by.sens.score}{Plot ratios by sensitivity. Defaults to TRUE.}
 
+\item{plot.ctrl.by.exp}{Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.}
+
+\item{wide.view}{For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.}
+
 \item{p.width}{Width of ratio plots. Defaults to 7.}
 
 \item{p.height}{Height of ratio plots. Defaults to 5.}
-
-\item{plot.ctrl.by.exp}{Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots

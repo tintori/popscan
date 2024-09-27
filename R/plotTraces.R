@@ -144,7 +144,7 @@ plotTraces <- function(sd.table, exp.design,
             labs(x="colorer", y="Hours to consume food", color=NULL)+
             theme_sophie
         print(p)
-        ggsave(paste0(output.dir, "/hours_to_consume_food.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/hours_to_consume_food.pdf"), device = "pdf",
                width = plot.width, height = plot.height )
     }
 }
