@@ -5,6 +5,7 @@
 #' @param exp.design A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
 #' @param inspect.each Allows you to inspect each trace by eye to make sure the min and max points of the growth curve are correctly IDed, and edit the "trim_before" and "trim_after" specifications, if not.
 #' @param save.to Location to save the new meta file, now with peak and valley values, and edited trim_before and trim_afters. Defaults to "./tmp_meta_with_time_to_starve.csv"
+#' @import dplyr
 #' @export
 #' @examples
 #' timeToStarve()
@@ -12,7 +13,6 @@
 timeToStarve <- function(sd.table, exp.design, 
                          inspect.each = F, save.to = "tmp_meta_with_time_to_starve.csv"){
     library(dplyr)
-    library(ggplot2)
     
     # find the max, min before the max, and time to starve
     sd.table.traits = sd.table %>% left_join(exp.design)

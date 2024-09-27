@@ -4,6 +4,7 @@
 #' @param exp.design A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
 #' @param remove.minimum For each pixel intensity, option to subtract the smallest frequency in the series from all images in the series. This should reduce background and improve contrast. Defaults to FALSE.
 #' @param save.to Location where standard deviation file will be saved. Defaults to "./tmp_standard_deviations.csv".
+#' @import dplyr
 #' @export
 #' @examples
 #' growthCurves()

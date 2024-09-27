@@ -8,6 +8,9 @@
 #' @param wide.view For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.
 #' @param p.width Width of ratio plots. Defaults to 7.
 #' @param p.height Height of ratio plots. Defaults to 5.
+#' @import ggplot2
+#' @import dplyr
+#' @import reshape2
 #' @export
 #' @examples
 #' plotRatios()

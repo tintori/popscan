@@ -7,6 +7,8 @@
 #' @param plot.trimmed.traces Plot just the lowest point to the highest point of each growth curve. Defaults to TRUE.
 #' @param plot.ghost.curve Plot the trimmed curves on top of the faded out full curves. Defaults to TRUE.
 #' @param plot.time.to.starve Plot just the number of hours from time fed to time starved. Defaults to TRUE.
+#' @import dplyr
+#' @import ggplot2
 #' @export
 #' @examples
 #' plotTraces()
