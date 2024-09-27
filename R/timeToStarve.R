@@ -47,6 +47,27 @@ timeToStarve <- function(sd.table, exp.design,
             tmp.trim_before = exp.design$trim.before[which(exp.design$grouper==tmp.grouper)]
             tmp.trim_after = exp.design$trim.after[which(exp.design$grouper==tmp.grouper)]
             
+            tmp.min = sd.table.traits$sd_time_of_valley[tmp.row]
+            tmp.max = sd.table.traits$sd_time_of_peak[tmp.row]
+            p = ggplot()+
+                geom_line(data = sd.table %>% filter(grouper==tmp.grouper), 
+                          aes(x=tm(timepoint), y=sd), color="gray")+
+                geom_line(data = sd.table %>% filter(grouper==tmp.grouper, tm(timepoint)<=tmp.max, tm(timepoint)>=tmp.min), 
+                          aes(x=tm(timepoint), y=sd), color="black")+
+                labs(title=tmp.grouper, x="time", y="worm density")
+            print(p)
+            
+            usr.input = readline(prompt = "RESPONSE NEEDED: Does the dark part of the curve end at the time of starvation?\n     Press [enter] if all looks good, or [any other key] to trim out a weird part of trace. [Q] to exit.   ")
+            if(usr.input==""){
+                ok.to.go.before = TRUE
+                ok.to.go.after = TRUE
+                next
+            }
+            if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
+                write.csv(exp.design, file = save.to, quote = F, row.names = F)
+                return(exp.design)
+            }
+            
             while(ok.to.go.before==FALSE){
                 # Plot the trace, highlighting what is currently ID'ed as 
                 tmp.min = sd.table.traits$sd_time_of_valley[tmp.row]
@@ -59,16 +80,25 @@ timeToStarve <- function(sd.table, exp.design,
                     labs(title=tmp.grouper, x="time", y="worm density")
                 print(p)
                 
-                usr.input = readline(prompt = "RESPONSE NEEDED: Change the trim_before value? YY-MM-DD_HH-MM, or [enter] for no change.   ")
+                usr.input = readline(prompt = "Trim high part from the LEFT? [YY-MM-DD_HH-MM] for trim point, or [enter] if the LEFT looks good.   ")
+                if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
+                    write.csv(exp.design, file = save.to, quote = F, row.names = F)
+                    return(exp.design)
+                }
                 if(usr.input==""){
                     ok.to.go.before=TRUE
                     next
                 }
                 if(usr.input!=""){
                     # check if the format is right
-                    while(is.na(tm(usr.input))){                
+                    while(is.na(tm(usr.input)) & usr.input!=""){                
                         usr.input = readline(prompt = "TRY AGAIN: The format must be YY-MM-DD_HH-MM (or [enter] for no change).   ")
                     }
+                    if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
+                        write.csv(exp.design, file = save.to, quote = F, row.names = F)
+                        return(exp.design)
+                    }
+                    if(usr.input == ""){next}
                     # Once the format is confirmed, re-do the min biz
                     sd.patch = sd.table %>% filter(grouper==tmp.grouper, 
                                                    tm(timepoint)>tm(usr.input))
@@ -106,16 +136,26 @@ timeToStarve <- function(sd.table, exp.design,
                     labs(title=tmp.grouper, x="time", y="worm density")
                 print(p)
                 
-                usr.input = readline(prompt = "RESPONSE NEEDED: Change the trim_after value? YY-MM-DD_HH-MM, or [enter] for no change.   ")
+                usr.input = readline(prompt = "Trim high part from the RIGHT? [YY-MM-DD_HH-MM] for trim point, or [enter] if the RIGHT looks good.   ")
                 if(usr.input==""){
                     ok.to.go.after=TRUE
                     next
                 }
+                if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
+                    write.csv(exp.design, file = save.to, quote = F, row.names = F)
+                    return(exp.design)
+                }
                 if(usr.input!=""){
                     # check if the format is right
-                    while(is.na(tm(usr.input))){                
+                    while(is.na(tm(usr.input)) & usr.input!=""){                
                         usr.input = readline(prompt = "TRY AGAIN: The format must be YY-MM-DD_HH-MM (or [enter] for no change).   ")
                     }
+                    if(usr.input == ""){next}
+                    if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
+                        write.csv(exp.design, file = save.to, quote = F, row.names = F)
+                        return(exp.design)
+                    }
+                    
                     # Once the format is confirmed, re-do the min biz
                     sd.patch = sd.table %>% filter(grouper==tmp.grouper, 
                                                    tm(timepoint)<tm(usr.input))
