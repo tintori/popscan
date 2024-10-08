@@ -6,6 +6,7 @@
 #' @param plot.by.sens.score Plot ratios by sensitivity. Defaults to TRUE.
 #' @param plot.ctrl.by.exp Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.
 #' @param wide.view For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.
+#' @param plot.unfaceted.tts Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.
 #' @param p.width Width of ratio plots. Defaults to 7.
 #' @param p.height Height of ratio plots. Defaults to 5.
 #' @import ggplot2
@@ -51,19 +52,22 @@ plotRatios <- function(sd.table, exp.design,
     ratio.table = sd.table %>%
         left_join(exp.design) %>% 
         filter(filterer==T) %>%   
-        select(-c(sd_peak_value, sd_time_of_peak, sd_valley_value, sd_time_of_valley, scan.prefix, scan.position, scan.dir, trim.before, trim.after,path.to.scan, path.to.crop))
+        select(-c(intersect(c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", 
+                              "scan.prefix", "scan.position", "scan.dir", "trim.before", "trim.after","path.to.scan", 
+                              "path.to.crop"), colnames(sd.table))))
     ratio.table[,ratio.trait] = as.factor(ratio.table[,ratio.trait])
     ratio.table[,ratio.group] = as.factor(ratio.table[,ratio.group])
-    ratio.table = ratio.table %>% group_by_at(c(ratio.trait, ratio.group)) %>%
+    ratio.table.long = ratio.table %>% group_by_at(c(ratio.trait, ratio.group)) %>%
         summarise(avg_time_to_starve = mean(hours_to_starve, na.rm = T),
                   ci_sd = sd(hours_to_starve, na.rm=T)) 
-    ratio.table = full_join(ratio.table %>% 
+    
+    ratio.table = full_join(ratio.table.long %>% 
                                 select(-ci_sd) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
                                        !!avg.levels[1] := trait.levels[1],
                                        !!avg.levels[2] := trait.levels[2]),
-                            ratio.table %>% 
+                            ratio.table.long %>% 
                                 select(-avg_time_to_starve) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
@@ -128,6 +132,78 @@ plotRatios <- function(sd.table, exp.design,
                width = p.width, height = p.height )
         
     }
+    
+    
+    
+    
+    # Time to starve, unfaceted, ordered by sensitivity score
+    
+    if(plot.unfaceted.tts){
+        ratio.table$facet_wrap = factor(ratio.table$facet_wrap,
+                                        levels = ratio.table %>% arrange(sens_score) %>%
+                                            select(facet_wrap) %>% unlist())
+        
+        plotter.table = sd.table %>%
+            select(grouper, timepoint, sd) %>% left_join(exp.design)
+        if(!"colorer" %in% colnames(plotter.table)){plotter.table = plotter.table %>% mutate(colorer = "NA")}
+        if(!"linetyper" %in% colnames(plotter.table)){plotter.table = plotter.table %>% mutate(linetyper = "NA")}
+        
+        if("facet_wrap" %in% colnames(sd.table)){
+            plot.width = ceiling(2*sqrt(length(unique(exp.design$facet_wrap)))+2)
+            plot.height = ceiling(2*sqrt(length(unique(exp.design$facet_wrap))))
+        }
+        if("facet_row" %in% colnames(sd.table)){
+            plot.width = ceiling(2*length(unique(exp.design$facet_row))+2)
+            plot.height = ceiling(2*length(unique(exp.design$facet_col)))
+        }
+        plotter.table = plotter.table %>%
+            select(intersect(colnames(plotter.table),
+                             c("grouper", "colorer", "hours_to_starve", "facet_wrap", "facet_row", "facet_col"))) %>%
+            distinct()
+        plotter.table$facet_wrap = factor(plotter.table$facet_wrap,
+                                          levels = ratio.table %>% arrange(sens_score) %>%
+                                              select(facet_wrap) %>% unlist())
+        ratio.table.long$facet_wrap = factor(ratio.table.long$facet_wrap, 
+                                             levels = ratio.table %>% arrange(sens_score) %>%
+                                                 select(facet_wrap) %>% unlist())
+        
+        p = ggplot()+
+            geom_segment(data = ratio.table.long, 
+                         aes(x = facet_wrap, group = colorer, 
+                             y = (avg_time_to_starve - ci_sd),
+                             yend = (avg_time_to_starve + ci_sd)),
+                         position = position_dodge(width = .25), color="black", alpha = .4, linewidth = 1)+
+            geom_point(data = plotter.table,
+                       aes(x=facet_wrap,
+                           y=hours_to_starve,
+                           color=colorer, 
+                           group = colorer),
+                       size=3, position = position_dodge(width = .25))+
+            scale_color_manual(values = c("#4d9221", "#c51b7d"), limits=unique(exp.design$colorer))+
+            geom_point(data = plotter.table,
+                       aes(x=facet_wrap,
+                           y=hours_to_starve,
+                           group = colorer),shape=1, color="black", size=3, position = position_dodge(width = .25))+
+             labs(y="Hours to consume food", color=NULL, x = NULL)+
+            geom_segment(data = ratio.table.long, 
+                         aes(x = facet_wrap, group = colorer, 
+                             y = (avg_time_to_starve - ci_sd),
+                             yend = (avg_time_to_starve + ci_sd)),
+                         position = position_dodge(width = .25), color="black", alpha = .2, linewidth = 1)+
+            
+            theme_sophie
+        print(p)
+        
+        ggsave(paste0(save.to.folder, "/timetostarve_by_sensscore.pdf"), device = "pdf",
+               width = 1.3*p.width, height = .8*p.height )
+        
+    }
+        
+        
+    
+    #     ggsave(paste0(save.to.folder, "/hours_to_consume_food.pdf"), device = "pdf",
+    #            width = plot.width, height = plot.height )
+    # }
     
     
 }

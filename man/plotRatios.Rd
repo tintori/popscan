@@ -31,6 +31,8 @@ plotRatios(
 \item{p.width}{Width of ratio plots. Defaults to 7.}
 
 \item{p.height}{Height of ratio plots. Defaults to 5.}
+
+\item{plot.unfaceted.tts}{Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots
