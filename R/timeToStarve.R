@@ -20,15 +20,15 @@ timeToStarve <- function(sd.table, exp.design,
     if("trim.before" %in% colnames(sd.table.traits)){
         sd.table.traits = sd.table.traits %>%
             mutate(sd=replace(sd, tm(timepoint)<tm(trim.before), 0))
-    }
+    } else(sd.table.traits[,"trim.before"] = NA)
     if("trim.after" %in% colnames(sd.table.traits)){
         sd.table.traits = sd.table.traits %>%
             mutate(sd=replace(sd, tm(timepoint)>tm(trim.after), 0))
-    }
+    } else(sd.table.traits[,"trim.after"] = NA)
     
     sd.table.traits = sd.table.traits %>% 
         # Find max sd min, max, values, and timepoints for such
-        group_by(grouper, time.fed) %>%
+        group_by(grouper, time.fed, trim.before, trim.after) %>%
         summarise(
             sd_peak_value=max(sd[tm(timepoint)>(tm(timepoint[1])+1)], na.rm = T),
             sd_time_of_peak=tm(timepoint[which(sd==sd_peak_value&tm(timepoint)>(tm(timepoint[1])+1))][1]),
@@ -44,8 +44,8 @@ timeToStarve <- function(sd.table, exp.design,
             ok.to.go.before = FALSE
             ok.to.go.after = FALSE
             tmp.grouper = sd.table.traits$grouper[tmp.row]
-            tmp.trim_before = exp.design$trim.before[which(exp.design$grouper==tmp.grouper)]
-            tmp.trim_after = exp.design$trim.after[which(exp.design$grouper==tmp.grouper)]
+            tmp.trim_before = sd.table.traits$trim.before[which(sd.table.traits$grouper==tmp.grouper)]
+            tmp.trim_after = sd.table.traits$trim.after[which(sd.table.traits$grouper==tmp.grouper)]
             
             tmp.min = sd.table.traits$sd_time_of_valley[tmp.row]
             tmp.max = sd.table.traits$sd_time_of_peak[tmp.row]
