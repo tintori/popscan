@@ -38,7 +38,7 @@ plotTraces <- function(sd.table, exp.design,
     if(length(unique(exp.design$colorer))==1){ custom_color = scale_color_manual(values = "black", limits=c(ref.color))}
     if(length(unique(exp.design$colorer)) %in% c(2:14)) {
         custom_color = scale_color_manual(values = pinkgreen8[sort(c(color_adding_order[1:length(unique(exp.design$colorer))]))],
-                                          limits=unique(exp.design$colorer))
+                                          limits=levels(exp.design$colorer))
     }
     
     plotter.table = NULL
@@ -47,7 +47,9 @@ plotTraces <- function(sd.table, exp.design,
     
     if(plot.untrimmed.traces|plot.trimmed.traces|plot.ghost.curve|plot.time.to.starve){
         plotter.table = sd.table %>%
-            select(grouper, timepoint, sd) %>% left_join(exp.design)
+            ungroup() %>%
+            select(grouper, timepoint, sd) %>% full_join(ungroup(exp.design)) %>%
+            mutate(tp_in_hours = as.numeric(difftime(tm(timepoint), tm(time.fed), units = "hours")))
         if(!"colorer" %in% colnames(plotter.table)){plotter.table = plotter.table %>% mutate(colorer = "NA")}
         if(!"linetyper" %in% colnames(plotter.table)){plotter.table = plotter.table %>% mutate(linetyper = "NA")}
 
@@ -64,12 +66,12 @@ plotTraces <- function(sd.table, exp.design,
     # Untrimmed traces
     if(plot.untrimmed.traces){
         p = plotter.table %>%
-            ggplot(aes(x=tm(timepoint), y=sd, group=grouper,
+            ggplot(aes(x=tp_in_hours, y=sd, group=grouper,
                        color=factor(colorer), 
                        linetype=factor(linetyper)))+
             geom_line() +
             custom_color +
-            labs(x="Time", y="Worm density\n(Standard deviation of pixel intensity)", 
+            labs(x="Hours", y="Worm density\n(Standard deviation of pixel intensity)", 
                  color=NULL) +
             theme_sophie
         if("facet_wrap" %in% colnames(sd.table)){ p = p + facet_wrap(~facet_wrap) }
@@ -87,11 +89,11 @@ plotTraces <- function(sd.table, exp.design,
         p = ggplot() +
             geom_line(data = plotter.table %>% 
                           filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak),
-                      aes(x=tm(timepoint), y=sd, group=grouper,
+                      aes(x=tp_in_hours, y=sd, group=grouper,
                        color=factor(colorer), 
                        linetype=factor(linetyper)))+
             custom_color +
-            labs(x="Time", y="Worm density\n(Standard deviation of pixel intensity)", 
+            labs(x="Hours", y="Worm density\n(Standard deviation of pixel intensity)", 
                  color=NULL) +
             theme_sophie
         if("facet_wrap" %in% colnames(sd.table)){ p = p + facet_wrap(~facet_wrap) }
@@ -108,16 +110,16 @@ plotTraces <- function(sd.table, exp.design,
     if(plot.ghost.curve){
         p = ggplot() +
             geom_line(data = plotter.table,
-                      aes(x=tm(timepoint), y=sd, group=grouper,
+                      aes(x=tp_in_hours, y=sd, group=grouper,
                           color=factor(colorer), 
                           linetype=factor(linetyper)), alpha=.1)+
             geom_line(data = plotter.table %>% 
                           filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak),
-                      aes(x=tm(timepoint), y=sd, group=grouper,
+                      aes(x=tp_in_hours, y=sd, group=grouper,
                           color=factor(colorer), 
                           linetype=factor(linetyper)))+
             custom_color +
-            labs(x="Time", y="Worm density\n(Standard deviation of pixel intensity)", 
+            labs(x="Hours", y="Worm density\n(Standard deviation of pixel intensity)", 
                  color=NULL) +
             theme_sophie
         if("facet_wrap" %in% colnames(sd.table)){ p = p + facet_wrap(~facet_wrap) }
@@ -143,7 +145,7 @@ plotTraces <- function(sd.table, exp.design,
             custom_color +
             geom_point(shape=1, color="black", size=3)+
             facet_wrap(~facet_wrap, dir = "v")+
-            labs(x="colorer", y="Hours to consume food", color=NULL)+
+            labs(x=NULL, y="Hours to consume food", color=NULL)+
             theme_sophie
         print(p)
         ggsave(paste0(save.to.folder, "/hours_to_consume_food.pdf"), device = "pdf",

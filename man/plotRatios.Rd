@@ -8,9 +8,11 @@ plotRatios(
   sd.table,
   exp.design,
   save.to.folder = "./tmp_plots",
+  ratio.trait = "colorer",
   plot.by.sens.score = TRUE,
   plot.ctrl.by.exp = TRUE,
-  wide.view = FALSE,
+  wide.view = TRUE,
+  plot.unfaceted.tts = TRUE,
   p.width = 7,
   p.height = 5
 )
@@ -22,17 +24,19 @@ plotRatios(
 
 \item{save.to.folder}{The folder where images will be saved. Defaults to "./tmp_plots".}
 
+\item{ratio.trait}{Name of the column which describes the variable used in sensitivity score ratios. Defaults to "colorer", which might be dose, depending on how you set up your meta.}
+
 \item{plot.by.sens.score}{Plot ratios by sensitivity. Defaults to TRUE.}
 
 \item{plot.ctrl.by.exp}{Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.}
 
-\item{wide.view}{For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.}
+\item{wide.view}{For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to TRUE}
+
+\item{plot.unfaceted.tts}{Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.}
 
 \item{p.width}{Width of ratio plots. Defaults to 7.}
 
 \item{p.height}{Height of ratio plots. Defaults to 5.}
-
-\item{plot.unfaceted.tts}{Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots

@@ -3,24 +3,28 @@
 #' @param sd.table A table with one row per image captured, with standard deviation of pixel intensity already calculated.
 #' @param exp.design A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
 #' @param save.to.folder The folder where images will be saved. Defaults to "./tmp_plots".
+#' @param ratio.trait Name of the column which describes the variable used in sensitivity score ratios. Defaults to "colorer", which might be dose, depending on how you set up your meta.
 #' @param plot.by.sens.score Plot ratios by sensitivity. Defaults to TRUE.
 #' @param plot.ctrl.by.exp Plot ctrl values on one axis and experimental values on the other. Defaults to TRUE.
-#' @param wide.view For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to FALSE.
+#' @param wide.view For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to TRUE
 #' @param plot.unfaceted.tts Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.
 #' @param p.width Width of ratio plots. Defaults to 7.
 #' @param p.height Height of ratio plots. Defaults to 5.
 #' @import ggplot2
 #' @import dplyr
 #' @import reshape2
+#' @import ggrepel
 #' @export
 #' @examples
 #' plotRatios()
 
 plotRatios <- function(sd.table, exp.design, 
                        save.to.folder="./tmp_plots", 
+                       ratio.trait="colorer",
                        plot.by.sens.score = TRUE,
                        plot.ctrl.by.exp = TRUE,
-                       wide.view = FALSE,
+                       wide.view = TRUE,
+                       plot.unfaceted.tts = TRUE,
                        p.width = 7,
                        p.height = 5){
     library(ggplot2)
@@ -43,20 +47,20 @@ plotRatios <- function(sd.table, exp.design,
     
     # Make ratio plot
     ratio.table = NULL
-    ratio.trait = "colorer"
     ratio.group = "facet_wrap"
     trait.levels = unique(sd.table[,ratio.trait])
-    avg.levels = paste0("avg_", trait.levels)
-    sd.levels = paste0("sd_", trait.levels)
+    avg.levels = paste0("avg_", trait.levels[[1]])
+    sd.levels = paste0("sd_", trait.levels[[1]])
     
-    ratio.table = sd.table %>%
-        left_join(exp.design) %>% 
+    ratio.table = sd.table %>% ungroup() %>%
+        left_join(exp.design %>% ungroup()) %>% 
         filter(filterer==T) %>%   
         select(-c(intersect(c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", 
                               "scan.prefix", "scan.position", "scan.dir", "trim.before", "trim.after","path.to.scan", 
                               "path.to.crop"), colnames(sd.table))))
-    ratio.table[,ratio.trait] = as.factor(ratio.table[,ratio.trait])
-    ratio.table[,ratio.group] = as.factor(ratio.table[,ratio.group])
+    ratio.table = ratio.table %>% 
+        mutate(!!sym(ratio.trait) := factor(!!sym(ratio.trait)),
+               !!sym(ratio.group) := factor(!!sym(ratio.group)) )
     ratio.table.long = ratio.table %>% group_by_at(c(ratio.trait, ratio.group)) %>%
         summarise(avg_time_to_starve = mean(hours_to_starve, na.rm = T),
                   ci_sd = sd(hours_to_starve, na.rm=T)) 
@@ -65,14 +69,14 @@ plotRatios <- function(sd.table, exp.design,
                                 select(-ci_sd) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
-                                       !!avg.levels[1] := trait.levels[1],
-                                       !!avg.levels[2] := trait.levels[2]),
+                                       !!avg.levels[1] := trait.levels[[1]][1],
+                                       !!avg.levels[2] := trait.levels[[1]][2]),
                             ratio.table.long %>% 
                                 select(-avg_time_to_starve) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
-                                       !!sd.levels[1] := trait.levels[1],
-                                       !!sd.levels[2] := trait.levels[2])) %>%
+                                       !!sd.levels[1] := trait.levels[[1]][1],
+                                       !!sd.levels[2] := trait.levels[[1]][2])) %>%
         # Calculate sensitivity score and confidence interval (error propagation of standard deviation
         # Error prop is ()
         mutate(sens_score = get(avg.levels[2])/get(avg.levels[1]),
@@ -89,8 +93,7 @@ plotRatios <- function(sd.table, exp.design,
                                                y=sens_score-sd_error_prop, yend = sens_score+sd_error_prop), color="gray")+
             geom_point(data = ratio.table, aes(x=facet_wrap, y=sens_score))+
             geom_hline(yintercept = 1)+
-            xlab("Strain")+
-            ylab("Treatment / Ctrl (hours to starvation)")+
+            labs(y="Treatment / Ctrl (hours to starvation)", x=NULL)+
             theme_sophie
         print(p)
         
@@ -102,23 +105,34 @@ plotRatios <- function(sd.table, exp.design,
     # Plot by avg ctrl vs avg experiment for each strain
     if(plot.ctrl.by.exp){
        
-        p = ggplot()+
-            geom_segment(data = ratio.table, aes(x = !!sym(avg.levels[1]) - !!sym(sd.levels[1]),
+        library(ggrepel)
+        p = ggplot(data = ratio.table %>% filter(!is.na(sens_score)))+
+            geom_segment(aes(x = !!sym(avg.levels[1]) - !!sym(sd.levels[1]),
                                                  xend = !!sym(avg.levels[1]) + !!sym(sd.levels[1]),
                                                  y = !!sym(avg.levels[2]), yend = !!sym(avg.levels[2])), color="gray")+
-            geom_segment(data = ratio.table, aes(x = !!sym(avg.levels[1]), xend = !!sym(avg.levels[1]),
+            geom_segment(aes(x = !!sym(avg.levels[1]), xend = !!sym(avg.levels[1]),
                                                  y = !!sym(avg.levels[2]) - !!sym(sd.levels[2]),
                                                  yend = !!sym(avg.levels[2]) + !!sym(sd.levels[2])), color="gray")+
-            geom_point(data = ratio.table, aes(x= !!sym(avg.levels[1]), y= !!sym(avg.levels[2])))+
+            geom_point(aes(x= !!sym(avg.levels[1]), 
+                           y= !!sym(avg.levels[2])))+
 
             xlab("Ctrl time to consume food")+
-            ylab("Treatment tie to consume food")+
+            ylab("Treatment time to consume food")+
+            geom_text_repel(aes(label = !!sym(ratio.group),
+                                 x= !!sym(avg.levels[1]), 
+                                 y= !!sym(avg.levels[2])))+  # hjust=0.5, vjust=0, force = .5, nudge_y = .005, nudge_x = 5, size=2
             theme_sophie
+  
+        print(p)
+        
+        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp.pdf"), device = "pdf",
+               width = p.width, height = p.height )
+        
         if(wide.view){
             tmp.min = min(c(ratio.table[,avg.levels[1]]-ratio.table[,sd.levels[1]],
-                            ratio.table[,avg.levels[2]]-ratio.table[,sd.levels[2]] ))
+                            ratio.table[,avg.levels[2]]-ratio.table[,sd.levels[2]] ), na.rm = T)
             tmp.max = max(c(ratio.table[,avg.levels[1]]+ratio.table[,sd.levels[1]],
-                            ratio.table[,avg.levels[2]]+ratio.table[,sd.levels[2]] ))
+                            ratio.table[,avg.levels[2]]+ratio.table[,sd.levels[2]] ), na.rm = T)
             p = p +
                 xlim(c(tmp.min, tmp.max))+
                 ylim(c(tmp.min, tmp.max))+
@@ -128,7 +142,7 @@ plotRatios <- function(sd.table, exp.design,
         }
         print(p)
         
-        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp_wide.pdf"), device = "pdf",
                width = p.width, height = p.height )
         
     }
@@ -198,13 +212,6 @@ plotRatios <- function(sd.table, exp.design,
                width = 1.3*p.width, height = .8*p.height )
         
     }
-        
-        
-    
-    #     ggsave(paste0(save.to.folder, "/hours_to_consume_food.pdf"), device = "pdf",
-    #            width = plot.width, height = plot.height )
-    # }
-    
     
 }
 
