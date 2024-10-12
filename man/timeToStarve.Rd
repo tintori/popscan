@@ -6,15 +6,12 @@
 \usage{
 timeToStarve(
   sd.table,
-  exp.design,
   inspect.each = F,
   save.to = "tmp_meta_with_time_to_starve.csv"
 )
 }
 \arguments{
 \item{sd.table}{A table with one row per image captured, with standard deviation of pixel intensity already calculated.}
-
-\item{exp.design}{A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.}
 
 \item{inspect.each}{Allows you to inspect each trace by eye to make sure the min and max points of the growth curve are correctly IDed, and edit the "trim_before" and "trim_after" specifications, if not.}
 

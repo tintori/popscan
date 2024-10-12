@@ -2,7 +2,6 @@
 #'
 #' This function accepts a table with a "sd" value (standard deviation of pixel intensity) for each image captured in a time course. It finds the peak and calculates the time of starvation.
 #' @param sd.table A table with one row per image captured, with standard deviation of pixel intensity already calculated.
-#' @param exp.design A table with one row per culture/plate/petri dish. Each column adds info about how to group, facet, color, etc the data points.
 #' @param inspect.each Allows you to inspect each trace by eye to make sure the min and max points of the growth curve are correctly IDed, and edit the "trim_before" and "trim_after" specifications, if not.
 #' @param save.to Location to save the new meta file, now with peak and valley values, and edited trim_before and trim_afters. Defaults to "./tmp_meta_with_time_to_starve.csv"
 #' @import dplyr
@@ -10,12 +9,13 @@
 #' @examples
 #' timeToStarve()
 
-timeToStarve <- function(sd.table, exp.design, 
-                         inspect.each = F, save.to = "tmp_meta_with_time_to_starve.csv"){
+timeToStarve <- function(sd.table, 
+                         inspect.each = F, 
+                         save.to = "tmp_meta_with_time_to_starve.csv"){
     library(dplyr)
     
     # find the max, min before the max, and time to starve
-    sd.table.traits = sd.table %>% left_join(exp.design)
+    sd.table.traits = sd.table
     
     if("trim.before" %in% colnames(sd.table.traits)){
         sd.table.traits = sd.table.traits %>%
@@ -26,9 +26,10 @@ timeToStarve <- function(sd.table, exp.design,
             mutate(sd=replace(sd, tm(timepoint)>tm(trim.after), 0))
     } else(sd.table.traits[,"trim.after"] = NA)
     
+    tmp.intersect = intersect(c("grouper", "time.fed", "trim.before", "trim.after", "colorer", "filterer", "linetyper", "sample"), colnames(sd.table.traits))
     sd.table.traits = sd.table.traits %>% 
         # Find max sd min, max, values, and timepoints for such
-        group_by(grouper, time.fed, trim.before, trim.after) %>%
+        group_by_at(tmp.intersect) %>%
         summarise(
             sd_peak_value=max(sd[tm(timepoint)>(tm(timepoint[1])+1)], na.rm = T),
             sd_time_of_peak=tm(timepoint[which(sd==sd_peak_value&tm(timepoint)>(tm(timepoint[1])+1))][1]),
@@ -64,8 +65,8 @@ timeToStarve <- function(sd.table, exp.design,
                 next
             }
             if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
-                write.csv(exp.design, file = save.to, quote = F, row.names = F)
-                return(exp.design)
+                write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+                return(sd.table.traits)
             }
             
             while(ok.to.go.before==FALSE){
@@ -82,8 +83,8 @@ timeToStarve <- function(sd.table, exp.design,
                 
                 usr.input = readline(prompt = "Trim high part from the LEFT? [YY-MM-DD_HH-MM] for trim point, or [enter] if the LEFT looks good.   ")
                 if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
-                    write.csv(exp.design, file = save.to, quote = F, row.names = F)
-                    return(exp.design)
+                    write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+                    return(sd.table.traits)
                 }
                 if(usr.input==""){
                     ok.to.go.before=TRUE
@@ -95,8 +96,8 @@ timeToStarve <- function(sd.table, exp.design,
                         usr.input = readline(prompt = "TRY AGAIN: The format must be YY-MM-DD_HH-MM (or [enter] for no change).   ")
                     }
                     if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
-                        write.csv(exp.design, file = save.to, quote = F, row.names = F)
-                        return(exp.design)
+                        write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+                        return(sd.table.traits)
                     }
                     if(usr.input == ""){next}
                     # Once the format is confirmed, re-do the min biz
@@ -120,7 +121,7 @@ timeToStarve <- function(sd.table, exp.design,
                     sd.table.traits[tmp.row,c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", "hours_to_starve")] = 
                         sd.patch[1,c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", "hours_to_starve")]
                     # Put the new trim_befoe value into the meta table
-                    if(!is.na(tm(usr.input))){exp.design[which(exp.design$grouper==tmp.grouper),"trim.before"] = usr.input}
+                    if(!is.na(tm(usr.input))){sd.table.traits[which(sd.table.traits$grouper==tmp.grouper),"trim.before"] = usr.input}
                 }
             }
             
@@ -142,8 +143,8 @@ timeToStarve <- function(sd.table, exp.design,
                     next
                 }
                 if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
-                    write.csv(exp.design, file = save.to, quote = F, row.names = F)
-                    return(exp.design)
+                    write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+                    return(sd.table.traits)
                 }
                 if(usr.input!=""){
                     # check if the format is right
@@ -152,8 +153,8 @@ timeToStarve <- function(sd.table, exp.design,
                     }
                     if(usr.input == ""){next}
                     if(usr.input %in% c("q", "Q", "quit", "QUIT", "Quit")){
-                        write.csv(exp.design, file = save.to, quote = F, row.names = F)
-                        return(exp.design)
+                        write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+                        return(sd.table.traits)
                     }
                     
                     # Once the format is confirmed, re-do the min biz
@@ -177,18 +178,14 @@ timeToStarve <- function(sd.table, exp.design,
                     sd.table.traits[tmp.row,c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", "hours_to_starve")] = 
                         sd.patch[1,c("sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", "hours_to_starve")]
                     # Put the new trim_after value into the meta table
-                    if(!is.na(tm(usr.input))){exp.design[which(exp.design$grouper==tmp.grouper),"trim.after"] = usr.input}
+                    if(!is.na(tm(usr.input))){sd.table.traits[which(sd.table.traits$grouper==tmp.grouper),"trim.after"] = usr.input}
                 }
             }
         }
     }
-    
-    # Collapse the files
-    exp.design = exp.design %>% select(setdiff(colnames(exp.design), c("time.fed", "sd_peak_value", "sd_time_of_peak", "sd_valley_value", "sd_time_of_valley", "hours_to_starve"))) %>% 
-        left_join(sd.table.traits, by = "grouper")
         
     # Save/return the files
-    write.csv(exp.design, file = save.to, quote = F, row.names = F)
-    return(exp.design)
+    write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)
+    return(sd.table.traits)
 }
 
