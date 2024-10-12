@@ -65,7 +65,7 @@ plotTraces <- function(sd.table, exp.design,
     
     # Untrimmed traces
     if(plot.untrimmed.traces){
-        p = plotter.table %>%
+        p = plotter.table %>% full_join(ungroup(exp.design)) %>% 
             ggplot(aes(x=tp_in_hours, y=sd, group=grouper,
                        color=factor(colorer), 
                        linetype=factor(linetyper)))+
@@ -88,7 +88,8 @@ plotTraces <- function(sd.table, exp.design,
     if(plot.trimmed.traces){
         p = ggplot() +
             geom_line(data = plotter.table %>% 
-                          filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak),
+                          filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak) %>% 
+                          full_join(ungroup(exp.design)),
                       aes(x=tp_in_hours, y=sd, group=grouper,
                        color=factor(colorer), 
                        linetype=factor(linetyper)))+
@@ -113,8 +114,9 @@ plotTraces <- function(sd.table, exp.design,
                       aes(x=tp_in_hours, y=sd, group=grouper,
                           color=factor(colorer), 
                           linetype=factor(linetyper)), alpha=.1)+
-            geom_line(data = plotter.table %>% 
-                          filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak),
+            geom_line(data = plotter.table%>% 
+                          filter(!tm(timepoint)<sd_time_of_valley, !tm(timepoint)>sd_time_of_peak)  %>% 
+                          full_join(ungroup(exp.design)) ,
                       aes(x=tp_in_hours, y=sd, group=grouper,
                           color=factor(colorer), 
                           linetype=factor(linetyper)))+
