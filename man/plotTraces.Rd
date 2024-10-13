@@ -11,7 +11,8 @@ plotTraces(
   plot.untrimmed.traces = T,
   plot.trimmed.traces = T,
   plot.ghost.curve = T,
-  plot.time.to.starve = T
+  plot.time.to.starve = T,
+  p.suffix = ""
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ plotTraces(
 \item{plot.ghost.curve}{Plot the trimmed curves on top of the faded out full curves. Defaults to TRUE.}
 
 \item{plot.time.to.starve}{Plot just the number of hours from time fed to time starved. Defaults to TRUE.}
+
+\item{p.suffix}{If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots

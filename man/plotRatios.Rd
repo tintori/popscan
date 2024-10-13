@@ -14,7 +14,8 @@ plotRatios(
   wide.view = TRUE,
   plot.unfaceted.tts = TRUE,
   p.width = 7,
-  p.height = 5
+  p.height = 5,
+  p.suffix = ""
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ plotRatios(
 \item{p.width}{Width of ratio plots. Defaults to 7.}
 
 \item{p.height}{Height of ratio plots. Defaults to 5.}
+
+\item{p.suffix}{If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots

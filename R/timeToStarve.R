@@ -26,7 +26,7 @@ timeToStarve <- function(sd.table,
             mutate(sd=replace(sd, tm(timepoint)>tm(trim.after), 0))
     } else(sd.table.traits[,"trim.after"] = NA)
     
-    tmp.intersect = intersect(c("grouper", "time.fed", "trim.before", "trim.after", "colorer", "filterer", "linetyper", "sample"), colnames(sd.table.traits))
+    tmp.intersect = intersect(c("grouper", "time.fed", "trim.before", "trim.after", "colorer", "filterer", "linetyper", "facet_wrap", "facet_row", "facet_row", "sample"), colnames(sd.table.traits))
     sd.table.traits = sd.table.traits %>% 
         # Find max sd min, max, values, and timepoints for such
         group_by_at(tmp.intersect) %>%

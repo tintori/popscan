@@ -10,6 +10,7 @@
 #' @param plot.unfaceted.tts Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.
 #' @param p.width Width of ratio plots. Defaults to 7.
 #' @param p.height Height of ratio plots. Defaults to 5.
+#' @param p.suffix If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).
 #' @import ggplot2
 #' @import dplyr
 #' @import reshape2
@@ -26,7 +27,8 @@ plotRatios <- function(sd.table, exp.design,
                        wide.view = TRUE,
                        plot.unfaceted.tts = TRUE,
                        p.width = 7,
-                       p.height = 5){
+                       p.height = 5,
+                       p.suffix = ""){
     library(ggplot2)
     library(dplyr)
     library(reshape2)
@@ -48,9 +50,9 @@ plotRatios <- function(sd.table, exp.design,
     # Make ratio plot
     ratio.table = NULL
     ratio.group = "facet_wrap"
-    trait.levels = unique(sd.table[,ratio.trait])
-    avg.levels = paste0("avg_", trait.levels[[1]])
-    sd.levels = paste0("sd_", trait.levels[[1]])
+    trait.levels = intersect(levels(sd.table[[ratio.trait]]), sd.table[[ratio.trait]])
+    avg.levels = paste0("avg_", trait.levels)
+    sd.levels = paste0("sd_", trait.levels)
     
     ratio.table = sd.table %>% ungroup() %>%
         left_join(exp.design %>% ungroup()) %>% 
@@ -69,14 +71,14 @@ plotRatios <- function(sd.table, exp.design,
                                 select(-ci_sd) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
-                                       !!avg.levels[1] := trait.levels[[1]][1],
-                                       !!avg.levels[2] := trait.levels[[1]][2]),
+                                       !!avg.levels[1] := trait.levels[1],
+                                       !!avg.levels[2] := trait.levels[2]),
                             ratio.table.long %>% 
                                 select(-avg_time_to_starve) %>% 
                                 dcast(get(ratio.group) ~ get(ratio.trait)) %>%
                                 rename("facet_wrap" = "get(ratio.group)",
-                                       !!sd.levels[1] := trait.levels[[1]][1],
-                                       !!sd.levels[2] := trait.levels[[1]][2])) %>%
+                                       !!sd.levels[1] := trait.levels[1],
+                                       !!sd.levels[2] := trait.levels[2])) %>%
         # Calculate sensitivity score and confidence interval (error propagation of standard deviation
         # Error prop is ()
         mutate(sens_score = get(avg.levels[2])/get(avg.levels[1]),
@@ -97,7 +99,7 @@ plotRatios <- function(sd.table, exp.design,
             theme_sophie
         print(p)
         
-        ggsave(paste0(save.to.folder, "/ratios_by_sens_score.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/ratios_by_sens_score", p.suffix, ".pdf"), device = "pdf",
                width = p.width, height = p.height )
         
     }
@@ -125,7 +127,7 @@ plotRatios <- function(sd.table, exp.design,
   
         print(p)
         
-        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp", p.suffix, ".pdf"), device = "pdf",
                width = p.width, height = p.height )
         
         if(wide.view){
@@ -142,7 +144,7 @@ plotRatios <- function(sd.table, exp.design,
         }
         print(p)
         
-        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp_wide.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/ratios_ctrl_by_exp_wide", p.suffix, ".pdf"), device = "pdf",
                width = p.width, height = p.height )
         
     }
@@ -208,7 +210,7 @@ plotRatios <- function(sd.table, exp.design,
             theme_sophie
         print(p)
         
-        ggsave(paste0(save.to.folder, "/timetostarve_by_sensscore.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/timetostarve_by_sensscore", p.suffix, ".pdf"), device = "pdf",
                width = 1.3*p.width, height = .8*p.height )
         
     }

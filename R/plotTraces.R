@@ -7,6 +7,7 @@
 #' @param plot.trimmed.traces Plot just the lowest point to the highest point of each growth curve. Defaults to TRUE.
 #' @param plot.ghost.curve Plot the trimmed curves on top of the faded out full curves. Defaults to TRUE.
 #' @param plot.time.to.starve Plot just the number of hours from time fed to time starved. Defaults to TRUE.
+#' @param p.suffix If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -18,7 +19,8 @@ plotTraces <- function(sd.table, exp.design,
                        plot.untrimmed.traces = T,
                        plot.trimmed.traces = T,
                        plot.ghost.curve = T,
-                       plot.time.to.starve = T){
+                       plot.time.to.starve = T,
+                       p.suffix = ""){
     library(ggplot2)
     library(dplyr)
     theme_sophie = theme_bw()+
@@ -80,7 +82,7 @@ plotTraces <- function(sd.table, exp.design,
         if(!"colorer" %in% colnames(exp.design)){p = p + guides(color="none")}
         
         print(p)
-        ggsave(paste0(save.to.folder, "/untrimmed_sd_curve.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/untrimmed_sd_curve", p.suffix, ".pdf"), device = "pdf",
                width = plot.width, height = plot.height) 
     }
     
@@ -103,7 +105,7 @@ plotTraces <- function(sd.table, exp.design,
         if(!"colorer" %in% colnames(exp.design)){p = p + guides(color="none")}
         
         print(p)
-        ggsave(paste0(save.to.folder, "/trimmed_sd_curve.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/trimmed_sd_curve", p.suffix, ".pdf"), device = "pdf",
                width = plot.width, height = plot.height) 
     }
     
@@ -130,7 +132,7 @@ plotTraces <- function(sd.table, exp.design,
         if(!"colorer" %in% colnames(exp.design)){p = p + guides(color="none")}
         
         print(p)
-        ggsave(paste0(save.to.folder, "/ghost_sd_curve.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/ghost_sd_curve", p.suffix, ".pdf"), device = "pdf",
                width = plot.width, height = plot.height) 
     }
     
@@ -150,7 +152,7 @@ plotTraces <- function(sd.table, exp.design,
             labs(x=NULL, y="Hours to consume food", color=NULL)+
             theme_sophie
         print(p)
-        ggsave(paste0(save.to.folder, "/hours_to_consume_food.pdf"), device = "pdf",
+        ggsave(paste0(save.to.folder, "/hours_to_consume_food", p.suffix, ".pdf"), device = "pdf",
                width = plot.width, height = plot.height )
     }
 }
