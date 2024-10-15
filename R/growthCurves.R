@@ -77,6 +77,9 @@ growthCurves <- function(exp.design,
         filter(filterer == TRUE)
     print(Sys.time())
     
+    # Get the NA rows back in there
+    summary.sd = full_join(summary.sd, exp.design %>% select(grouper, colorer, filterer, facet_wrap, time.fed))
+    
     if(!is.na(save.to)){write.csv(summary.sd, file = save.to, quote = F, row.names = F)}
     return(summary.sd)
 }

@@ -28,6 +28,7 @@ timeToStarve <- function(sd.table,
     
     tmp.intersect = intersect(c("grouper", "time.fed", "trim.before", "trim.after", "colorer", "filterer", "linetyper", "facet_wrap", "facet_row", "facet_row", "sample"), colnames(sd.table.traits))
     sd.table.traits = sd.table.traits %>% 
+        filter(!is.na(sd)) %>%
         # Find max sd min, max, values, and timepoints for such
         group_by_at(tmp.intersect) %>%
         summarise(
@@ -104,6 +105,7 @@ timeToStarve <- function(sd.table,
                     sd.patch = sd.table %>% filter(grouper==tmp.grouper, 
                                                    tm(timepoint)>tm(usr.input))
                     if(!is.na(tmp.trim_after)){ sd.patch = sd.patch %>% filter(tm(timepoint)<tm(tmp.trim_after)) } 
+                    tmp.trim_before = usr.input
                     
                     # Rerun the peak and valley finding lines
                     sd.patch = sd.patch %>% 
@@ -183,6 +185,8 @@ timeToStarve <- function(sd.table,
             }
         }
     }
+    
+    sd.table.traits = full_join(sd.table.traits, sd.table %>% select(grouper, colorer, filterer, time.fed, facet_wrap) %>% distinct())
         
     # Save/return the files
     write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)

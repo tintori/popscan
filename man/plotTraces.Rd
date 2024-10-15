@@ -12,6 +12,8 @@ plotTraces(
   plot.trimmed.traces = T,
   plot.ghost.curve = T,
   plot.time.to.starve = T,
+  p.width = NA,
+  p.height = NA,
   p.suffix = ""
 )
 }
@@ -29,6 +31,10 @@ plotTraces(
 \item{plot.ghost.curve}{Plot the trimmed curves on top of the faded out full curves. Defaults to TRUE.}
 
 \item{plot.time.to.starve}{Plot just the number of hours from time fed to time starved. Defaults to TRUE.}
+
+\item{p.width}{Force plot width. Defaults to NA.}
+
+\item{p.height}{Force plot height. Defaults to NA.}
 
 \item{p.suffix}{If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).}
 }
