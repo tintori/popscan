@@ -41,10 +41,13 @@ plotTraces <- function(sd.table, exp.design,
     pinkgreen8 = c("#4d9221", "#7fbc41", "#b8e186", "#e6f5d0", "#fde0ef", "#f1b6da", "#de77ae", "#c51b7d", "#821252", "#960EBE", "#6600FF", "#5555FF", "#44AAFF", "#33FFFF")
     color_adding_order = c(1,8,6,3,7,2,5,4,9,10,11,12,13,14)
     custom_color = NULL
-    if(length(levels(exp.design$colorer))==1){ custom_color = scale_color_manual(values = "black", limits=c(ref.color))}
-    if(length(levels(exp.design$colorer)) %in% c(2:14)) {
-        custom_color = scale_color_manual(values = pinkgreen8[sort(c(color_adding_order[1:length(levels(exp.design$colorer))]))],
-                                          limits=levels(exp.design$colorer), drop = FALSE)
+    tmp.color.ln = length( unique(c(exp.design$colorer, NA))[!is.na(unique(c(exp.design$colorer, NA)))])
+    if(tmp.color.ln==1){ 
+        custom_color = scale_color_manual(values = "black", limits=c(ref.color))}
+    if(tmp.color.ln %in% c(2:14)) {
+        custom_color = scale_color_manual(values = pinkgreen8[sort(c(color_adding_order[1:tmp.color.ln]))],
+                                          limits=unique(c(exp.design$colorer, NA))[!is.na(unique(c(exp.design$colorer, NA)))], 
+                                          drop = FALSE)
     }
     
     plotter.table = NULL

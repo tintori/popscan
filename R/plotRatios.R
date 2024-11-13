@@ -50,7 +50,8 @@ plotRatios <- function(sd.table, exp.design,
     # Make ratio plot
     ratio.table = NULL
     ratio.group = "facet_wrap"
-    trait.levels = intersect(levels(sd.table[[ratio.trait]]), sd.table[[ratio.trait]])
+    if(!is.factor(exp.design[[ratio.trait]])){exp.design[[ratio.trait]] <- as.factor(exp.design[[ratio.trait]])}
+    trait.levels = intersect(levels(exp.design[[ratio.trait]]), exp.design[[ratio.trait]])
     avg.levels = paste0("avg_", trait.levels)
     sd.levels = paste0("sd_", trait.levels)
     
