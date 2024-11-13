@@ -46,7 +46,7 @@ plotTraces <- function(sd.table, exp.design,
         custom_color = scale_color_manual(values = "black", limits=c(ref.color))}
     if(tmp.color.ln %in% c(2:14)) {
         custom_color = scale_color_manual(values = pinkgreen8[sort(c(color_adding_order[1:tmp.color.ln]))],
-                                          limits=unique(c(exp.design$colorer, NA))[!is.na(unique(c(exp.design$colorer, NA)))], 
+                                          limits=unique(exp.design$colorer)[!is.na(unique(exp.design$colorer))], 
                                           drop = FALSE)
     }
     
