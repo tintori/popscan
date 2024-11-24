@@ -9,7 +9,8 @@ growthCurves(
   start.from = NA,
   patch.up = NA,
   remove.minimum = F,
-  save.to = "./tmp_standard_deviations.csv"
+  save.to = "./tmp_standard_deviations.csv",
+  skip.filtereds = TRUE
 )
 }
 \arguments{

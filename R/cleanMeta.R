@@ -81,7 +81,9 @@ cleanMeta <- function(in.table,
     # 
     if(length(group.factors)>0){ expDesign$grouper = apply(as.data.frame(in.table[,c(group.factors)]),1,function(x){paste(x,collapse = "_")}) }
     if(!is.na(color.factor)){ expDesign$colorer = in.table[,color.factor] }
-    if(length(filters)>0){ expDesign$filterer = apply(as.data.frame(in.table[,filters]),1,function(x){all(x, na.rm = TRUE)}) }
+    if(length(filters)>0){ expDesign$filterer = apply(as.data.frame(in.table[,filters]),1,function(x){all(x, na.rm = TRUE)}) } else {
+        expDesign$filterer = TRUE
+    }
     if(!is.na(linetype.factor)){ expDesign$linetyper = in.table[,linetype.factor] }
     if(!is.na(timefed)){ expDesign$time.fed = in.table[,timefed] }
     if(!is.na(trimbefore)){ expDesign$trim.before = in.table[,trimbefore] }
@@ -91,5 +93,5 @@ cleanMeta <- function(in.table,
         expDesign$facet_row = apply(as.data.frame(in.table[,c(facet.grid.factors[[1]])]),1,function(x){paste(x,collapse = "_")})
         expDesign$facet_col = apply(as.data.frame(in.table[,c(facet.grid.factors[[2]])]),1,function(x){paste(x,collapse = "_")}) }
     
-    return(expDesign)
+    return(expDesign %>% distinct())
 }

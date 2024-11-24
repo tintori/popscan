@@ -27,6 +27,7 @@ timeToStarve <- function(sd.table,
     } else(sd.table.traits[,"trim.after"] = NA)
     
     tmp.intersect = intersect(c("grouper", "time.fed", "trim.before", "trim.after", "colorer", "filterer", "linetyper", "facet_wrap", "facet_row", "facet_row", "sample"), colnames(sd.table.traits))
+    if("filterer" %in% tmp.intersect){sd.table.traits = sd.table.traits %>% filter(filterer)}
     sd.table.traits = sd.table.traits %>% 
         filter(!is.na(sd)) %>%
         # Find max sd min, max, values, and timepoints for such
@@ -186,7 +187,7 @@ timeToStarve <- function(sd.table,
         }
     }
     
-    sd.table.traits = full_join(sd.table.traits, sd.table %>% select(grouper, colorer, filterer, time.fed, facet_wrap) %>% distinct())
+    sd.table.traits = full_join(sd.table.traits, sd.table %>% select(intersect(c("grouper", "colorer", "filterer", "time.fed", "facet_wrap"), tmp.intersect)) %>% distinct())
         
     # Save/return the files
     write.csv(sd.table.traits, file = save.to, quote = F, row.names = F)

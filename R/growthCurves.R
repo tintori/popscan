@@ -12,7 +12,8 @@
 growthCurves <- function(exp.design, 
                          start.from = NA, patch.up = NA, 
                          remove.minimum = F,
-                         save.to = "./tmp_standard_deviations.csv" ){
+                         save.to = "./tmp_standard_deviations.csv",
+                         skip.filtereds = TRUE){
     library(dplyr)
 
     # Load data
@@ -21,7 +22,9 @@ growthCurves <- function(exp.design,
     histos.df = data.frame()
     for(tmp.row in match(unique(exp.design$crop.name), exp.design$crop.name)){
         
-        if(exp.design$filterer[tmp.row] == FALSE){next}
+        if(skip.filtereds){
+            if(exp.design$filterer[tmp.row] == FALSE){next}
+        }
  
         histo_folder = exp.design$path.to.crop[tmp.row]
         print(histo_folder)
@@ -66,19 +69,19 @@ growthCurves <- function(exp.design,
     # Calculate sds
     print(paste0("CALCULATING SDs FOR EACH TIMEPOINT - this might take ~", ceiling((nrow(histos.tb)/8000)/60) ," minutes? Depending on your computer"))
     print(Sys.time())
-    summary.sd <- histos.tb %>%
+    summary.sd <- histos.tb %>% 
         mutate(run_tp = 0) %>% 
         group_by(sample, timepoint) %>%
         summarise(
             sd = sd(rep(Value,Count), na.rm = T)
         ) %>% 
         mutate(crop.name = sample) %>%
-        left_join(by="crop.name", exp.design) %>% 
-        filter(filterer == TRUE)
+        left_join(by="crop.name", exp.design)
+    if(skip.filtereds){summary.sd <- summary.sd %>% filter(filterer == TRUE)}
     print(Sys.time())
     
     # Get the NA rows back in there
-    summary.sd = full_join(summary.sd, exp.design %>% select(grouper, colorer, filterer, facet_wrap, time.fed))
+    summary.sd = full_join(summary.sd, exp.design %>% select(intersect(c("grouper", "colorer", "filterer", "facet_wrap", "time.fed"), colnames(exp.design))))
     
     if(!is.na(save.to)){write.csv(summary.sd, file = save.to, quote = F, row.names = F)}
     return(summary.sd)
