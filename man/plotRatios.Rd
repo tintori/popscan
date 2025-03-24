@@ -12,9 +12,12 @@ plotRatios(
   plot.by.sens.score = TRUE,
   plot.ctrl.by.exp = TRUE,
   wide.view = TRUE,
+  radiate = NULL,
   plot.unfaceted.tts = TRUE,
-  p.width = 7,
-  p.height = 5,
+  pval.reds = FALSE,
+  pairwise.sens.scores = TRUE,
+  p.width = 5,
+  p.height = 4,
   p.suffix = ""
 )
 }
@@ -33,13 +36,19 @@ plotRatios(
 
 \item{wide.view}{For ctrl-by-exp plot, make the x and y axes limits match, and add a 1:1 reference line. Makes square dotplot. Defaults to TRUE}
 
+\item{radiate}{For wide ctrl-by-exp plot, draw a 1:x and x:1 reference lines, in addition to the 1:1. Defaults to NULL.}
+
 \item{plot.unfaceted.tts}{Plot time to starvation, all on one plot, with samples ordered by sensitivity score. Defaults to TRUE.}
+
+\item{pairwise.sens.scores}{Whether to make a grid plot colored by p-values showing statistical significance of different strains responses to the treatment. Defaults to TRUE.}
 
 \item{p.width}{Width of ratio plots. Defaults to 7.}
 
 \item{p.height}{Height of ratio plots. Defaults to 5.}
 
 \item{p.suffix}{If running this multiple ways, include a suffix for the exported files, to distinguish them from each other. Defaults to "" (nothing).}
+
+\item{pval.red}{Whether to color code ratios by statistical significance. Defaults to F - all black dots.}
 }
 \description{
 Takes a growth curve table and meta_with_minmax table and outputs an assortment of plots
