@@ -18,7 +18,6 @@
 #' @import dplyr
 #' @import reshape2
 #' @import ggrepel
-#' @import BSDA
 #' @export
 #' @examples
 #' plotRatios()
@@ -81,6 +80,7 @@ plotRatios <- function(sd.table, exp.design,
                 # filter out anything with less than 2 in one condition
                 filter(!facet_wrap %in% (
                     ratio.table %>% 
+                        filter(!is.na(hours_to_starve))%>%
                         select(facet_wrap, colorer) %>% 
                         table() %>% as_tibble() %>% 
                         pivot_wider(names_from = colorer, values_from = n) %>% 
@@ -195,64 +195,7 @@ plotRatios <- function(sd.table, exp.design,
         
         write.table(x = p.val.table, file = paste0(save.to.folder, "/pairwise_sens_score_table", 
                                                    p.suffix, ".csv"), sep = ",", row.names = FALSE)
-        
-        
-                 
-                 
-                 
-        
-        #~# Obsolete pairwise pval thing
-        ss_ep = exp.design %>%
-            filter(filterer==T) %>% ungroup() %>%
-            select(grouper, colorer, facet_wrap, hours_to_starve) %>%
-            group_by(colorer, facet_wrap) %>%
-            summarise(mean = mean(hours_to_starve),
-                      sd = sd(hours_to_starve),
-                      n = n()) %>%
-            group_by(facet_wrap) %>%
-            mutate(both = n()) %>% filter(both>1) %>%
-            mutate(treatment = case_when(colorer == levels(colorer)[1] ~ "control",
-                                         .default = "experimental")) %>%
-            select(-colorer) %>%
-            pivot_wider(names_from = "treatment", values_from = c("mean", "sd", "n")) %>%
-            mutate(sens_score = mean_experimental/mean_control,
-                   sd_EP = sens_score*sqrt((sd_experimental/mean_experimental)^2+(sd_control/mean_control)^2),
-                   n_EP = sqrt(n_control^2 + n_experimental^2),
-                   n_sum = n_control+n_experimental) %>%
-            column_to_rownames("facet_wrap")
-
-        # run the t-test for each pairwise comparison
-        p.val.table = data.frame(samp1 = character(0), samp2=character(0), p.val = numeric(0))
-        for(samp1 in levels(ratio.table$facet_wrap)){
-            for(samp2 in levels(ratio.table$facet_wrap)){
-                if(samp1==samp2){next}
-             #   if(samp2 %in% unique(p.val.table$samp1)){next}
-                p.val.table[nrow(p.val.table)+1,] =
-                    c(samp1, samp2, tsum.test(mean.x = ss_ep[samp1,"sens_score"], s.x = ss_ep[samp1,"sd_EP"], n.x = ss_ep[samp1,"n_EP"],
-                                              mean.y = ss_ep[samp2,"sens_score"], s.y = ss_ep[samp2,"sd_EP"], n.y = ss_ep[samp2,"n_EP"])$p.value)
-            }
-        }
-
-        p = p.val.table %>%
-            filter(!is.na(p.val)) %>%
-            mutate(p.val = as.numeric(p.val)) %>%
-            mutate(sig_color = case_when(p.val >= 0.01 ~ 9, # not sig
-                                        p.val < 0.01 & p.val >= 0.0001 ~ 6, # 0.01 - 10^-4
-                                        p.val < 0.0001 & p.val >= 0.000001 ~ 7, # 10^4 - 10^-6
-                                        p.val < 0.000001 ~ 8)) %>% # <10^-6
-            ggplot(aes(x=ordered(samp1, levels = levels(ratio.table$facet_wrap)),
-                       y=ordered(samp2, levels = rev(levels(ratio.table$facet_wrap))),
-                       fill=as.character(sig_color)))+
-            geom_tile(color="white")+
-            scale_fill_manual(breaks = as.character(c(1:9)), values = pval_cols)+
-            theme_sophie+
-            theme(axis.title = element_blank(), legend.position = "none",
-                  panel.border = element_blank(), axis.ticks = element_blank())
-        print(p)
-        ggsave(paste0(save.to.folder, "/pairwise_sens_score_obs", p.suffix, ".pdf"), device = "pdf",
-               width = p.width*2, height = p.height )
-
-    }
+     }
     
     # Plot by avg ctrl vs avg experiment for each strain
     if(plot.ctrl.by.exp){
